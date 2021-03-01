@@ -281,3 +281,18 @@ EOF
     Name = "IB07441-EC2-SpringBoot"
   }
 }
+
+resource "aws_s3_bucket" "S3_Bucket" {
+  bucket = "ib07441-spring-boot-build"
+  force_destroy = true
+  acl    = "private"
+
+  versioning {
+    enabled = true
+  }
+
+  tags = {
+    Name        = "IB07441_S3_Bucket"
+    Environment = "Dev"
+  }
+}
