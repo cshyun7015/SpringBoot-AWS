@@ -1,4 +1,0 @@
-com/tensec/book/springboot/web/HelloController.java
- com.tensec.book.springboot.web.HelloController
-com/tensec/book/springboot/Application.java
- com.tensec.book.springboot.Application

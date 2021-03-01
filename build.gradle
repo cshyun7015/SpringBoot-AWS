@@ -1,13 +1,10 @@
 buildscript {
-    ext {
-        springBootVersion = '2.1.7.RELEASE'
-    }
     repositories {
         mavenCentral()
         jcenter()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.7.RELEASE")
     }
 }
 
@@ -18,7 +15,6 @@ apply plugin: 'io.spring.dependency-management'
 
 group 'com.tensec.book'
 version '1.0-SNAPSHOT'
-sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -26,11 +22,5 @@ repositories {
 
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
-    //compile('org.projectlombok:lombok')
-    annotationProcessor 'org.projectlombok:lombok:1.16.20'
     testCompile('org.springframework.boot:spring-boot-starter-test')
-}
-
-test {
-    useJUnitPlatform()
 }

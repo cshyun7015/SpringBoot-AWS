@@ -1,6 +1,7 @@
 # Project exclude paths
 /.gradle/
 /.idea/
+/build/
 /terraform/.terraform/
 /terraform/.terraform.lock.hcl
 /terraform/terraform.tfstate
