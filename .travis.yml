@@ -42,7 +42,6 @@ deploy:
     region: ap-northeast-2
     wait-until-deployed: true
 
-
 notifications:
   email:
     recipients:
