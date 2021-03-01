@@ -166,8 +166,8 @@ variable default_keypair_name {
   default = "IB07441_sshkey"
 }
 
-resource "aws_iam_role" "WebAppRole" {
-  name = "IB07441_WebAppRole"
+resource "aws_iam_role" "IAM-Role-SpringBoot" {
+  name = "IB07441_IAM_Role_SpringBoot"
   path = "/"
 
   assume_role_policy = <<EOF
@@ -188,34 +188,24 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "role_policy_attach_AWSCodeDeployReadOnlyAccess" {
-  role       = aws_iam_role.WebAppRole.name
+  role       = aws_iam_role.IAM-Role-SpringBoot.name
   policy_arn = "arn:aws:iam::aws:policy/AWSCodeDeployReadOnlyAccess"
 }
 resource "aws_iam_role_policy_attachment" "role_policy_attach_AmazonEC2ReadOnlyAccess" {
-  role       = aws_iam_role.WebAppRole.name
+  role       = aws_iam_role.IAM-Role-SpringBoot.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
 }
 
 
-resource "aws_iam_policy" "WebAppRolePolicies" {
-  name        = "IB07441_WebAppRolePolicies"
+resource "aws_iam_policy" "SpringBootRolePolicies" {
+  name        = "IB07441_SpringBootRolePolicies"
   path        = "/"
-  description = "IB07441_WebAppRolePolicies"
+  description = "IB07441_SpringBootRolePolicies"
 
   policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
-            {
-              "Effect": "Allow",
-              "Action": [
-                "autoscaling:Describe*",
-                "autoscaling:EnterStandby",
-                "autoscaling:ExitStandby",
-                "autoscaling:UpdateAutoScalingGroup"
-              ],
-              "Resource" : "*"
-            },
             {
               "Effect": "Allow",
               "Action": [
@@ -231,9 +221,8 @@ resource "aws_iam_policy" "WebAppRolePolicies" {
                 "s3:List*"
               ],
               "Resource": [
-                "arn:aws:s3:::ib07441-cicd-workshop",
-                "arn:aws:s3:::ib07441-cicd-workshop/*",
-                "arn:aws:s3:::IB07441-CodePipeline*"
+                "arn:aws:s3:::ib07441-spring-boot-build",
+                "arn:aws:s3:::ib07441-spring-boot-build/*"
               ]
             }
   ]
@@ -241,14 +230,14 @@ resource "aws_iam_policy" "WebAppRolePolicies" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "IB07441_role_policy_attach_WebApp" {
-  role       = aws_iam_role.WebAppRole.name
-  policy_arn = aws_iam_policy.WebAppRolePolicies.arn
+resource "aws_iam_role_policy_attachment" "IB07441_role_policy_attach_SpringBoot" {
+  role       = aws_iam_role.IAM-Role-SpringBoot.name
+  policy_arn = aws_iam_policy.SpringBootRolePolicies.arn
 }
 
 resource "aws_iam_instance_profile" "InstanceProfile" {
   name = "IB07441_InstanceProfile"
-  role = aws_iam_role.WebAppRole.name
+  role = aws_iam_role.IAM-Role-SpringBoot.name
 }
 
 resource "aws_instance" "SpringBoot_EC2_01" {
@@ -269,8 +258,9 @@ resource "aws_instance" "SpringBoot_EC2_01" {
 yum upgrade
 yum install -y aws-cli
 yum install -y git
-yum -y install codedeploy-agent.noarch.rpm
-service codedeploy-agent start
+wget https://aws-codedeploy-ap-northeast-2.s3.ap-northeast-2.amazonaws.com/latest/install
+chmod +x ./install
+./install auto
 yum remove -y java-1.7.0-openjdk
 yum install -y java-1.8.0-openjdk-devel.x86_64
 rm /etc/localtime
@@ -294,5 +284,52 @@ resource "aws_s3_bucket" "S3_Bucket" {
   tags = {
     Name        = "IB07441_S3_Bucket"
     Environment = "Dev"
+  }
+}
+
+resource "aws_codedeploy_app" "Codedeploy-App" {
+  compute_platform = "Server"
+  name             = "IB07441-CodeDeploy-App-Spring-Boot"
+}
+
+resource "aws_iam_role" "DeployTrustRole" {
+  name = "IB07441_DeployTrustRole"
+  path = "/"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+            {
+              "Sid" : "",
+              "Effect" : "Allow",
+              "Principal" : {
+                "Service": [
+                    "codedeploy.amazonaws.com"
+                ]
+              },
+              "Action" : "sts:AssumeRole"
+            }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "role_policy_attach_codedeploy" {
+  role       = aws_iam_role.DeployTrustRole.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole"
+}
+
+resource "aws_codedeploy_deployment_group" "Codedeploy-DeploymentGroup" {
+  app_name              = aws_codedeploy_app.Codedeploy-App.name
+  deployment_group_name = "IB07441-Codedeploy-DeploymentGroup-SpringBoot"
+  service_role_arn      = aws_iam_role.DeployTrustRole.arn
+  deployment_config_name = "CodeDeployDefault.OneAtATime"
+  ec2_tag_set {
+    ec2_tag_filter {
+      key = "Name"
+      type = "KEY_AND_VALUE"
+      value = "IB07441-EC2-SpringBoot"
+    }
   }
 }

@@ -31,6 +31,17 @@ deploy:
     acl: private
     local_dir: deploy
     wait-until-deployed: true
+  - provider: codedeploy
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
+    bucket: ib07441-spring-boot-build
+    key: SpringBoot-AWS.zip
+    bundle_type: zip
+    application: IB07441-CodeDeploy-App-Spring-Boot
+    deployment_group: IB07441-Codedeploy-DeploymentGroup-SpringBoot
+    region: ap-northeast-2
+    wait-until-deployed: true
+
 
 notifications:
   email:
