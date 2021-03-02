@@ -2,6 +2,7 @@
 /.gradle/
 /.idea/
 /build/
+/out/
 /terraform/.terraform/
 /terraform/.terraform.lock.hcl
 /terraform/terraform.tfstate
