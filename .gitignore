@@ -7,3 +7,4 @@
 /terraform/.terraform.lock.hcl
 /terraform/terraform.tfstate
 /terraform/terraform.tfstate.backup
+/src/main/resources/application-oauth.properties
